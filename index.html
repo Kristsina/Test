@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html ng-app="pl">
+<head>
+    <title>First Tasks</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js"></script>
+	<script src="http://underscorejs.org/underscore-min.js"></script>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>
+		
+		var app = angular.module('pl', []);
+		
+		var rate;
+		var cur = "CAD";
+		function rates (cur) {
+			$.getJSON( "http://api.fixer.io/latest", function( json ) {
+				rate = json.rates[ cur ];
+			});
+		};
+		rates("CAD");
+		
+		function CalcAmount($scope) {
+				$scope.addCur = function() {
+					rates($scope.newCur);
+					cur = $scope.newCur;
+				};
+				$scope.sum = function () {
+					return parseInt($scope.FirstNumber) + parseInt($scope.SecondNumber);
+				};
+				$scope.can_sum = function () {
+					return (parseInt($scope.FirstNumber) + parseInt($scope.SecondNumber)) * rate;
+				};
+				$scope.todos = [
+					{text:'learn angular', done:true},
+					{text:'build an angular app', done:false}
+				];
+		}
+		app.directive('ex', function() {
+		  return {
+			restrict: 'E',
+			template: '<input type="text" value={{sum()}}>',
+			controller: function($scope, $element){
+				$scope.sum = function () {
+					location.href = 'index.html#'+parseNumber(1)+'x'+parseNumber(2);
+					return parseNumber(1) + parseNumber(2);
+				};		
+				var number = function (a) {
+					if (a == 1) return $scope.FirstNumber; else return $scope.SecondNumber;
+				};
+				var parse = function (a) {
+					return parseInt(a);
+				};
+				var parseNumber = _.compose(parse, number);
+			}
+		  }
+		})
+	</script>	
+</head>
+
+<body>
+	<div ng-app>
+	<h3>Please enter your numbers:</h3>
+		<div ng-controller="CalcAmount">
+			<table>
+				<tr>
+					<td><input type="text" ng-model="FirstNumber" placeholder="Enter a first number"/></td>
+				</tr>
+				<tr>
+					<td><input type="text" ng-model="SecondNumber" placeholder="Enter a second number"/></td>
+				</tr>
+			</table>	
+			<hr>
+			<span>
+				Result of the sum: 
+				<ex></ex>
+			</span>
+			<br><br>
+			<form ng-submit="addCur()">
+				New currency code: 
+				<input type="text" ng-model="newCur" placeholder="CAD">
+				<input type="submit" value="Calculate"> (please, press two times)
+			
+			<br><br>
+			<span>Recalculated sum: 
+				<input type="text" value="{{can_sum()}}"/>
+			</span>
+		</div>
+	</div>
+</body>
+</html>
